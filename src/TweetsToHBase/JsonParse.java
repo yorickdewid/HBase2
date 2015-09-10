@@ -7,8 +7,13 @@ package TweetsToHBase;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.json.*;
 
 /**
@@ -16,17 +21,13 @@ import org.json.*;
  * @author eve
  */
 public class JsonParse {
-    
+
     private ArrayList<JsonTweet> tweets;
-    
+
     public JsonParse() {
         this.tweets = new ArrayList<JsonTweet>();
     }
-    
-    public ArrayList<JsonTweet> getTweets() {
-        return this.tweets;
-    }
-    
+
     public String getTimestampFromPath(String path) {
         String timestamp = null;
         String[] tmp = path.split("/");
@@ -37,7 +38,7 @@ public class JsonParse {
         }
         return timestamp;
     }
-    
+
     private boolean isFileValid(String filename) {
         String ext = filename.split("\\.")[1];
         if (ext == null) {
@@ -47,8 +48,9 @@ public class JsonParse {
         }
         return false;
     }
-    
+
     public void openDir(File[] files) {
+        DBInsert db = new DBInsert("hhscyber:tweets");
         for (File file : files) {
             if (file.isDirectory()) {
                 System.out.println("Directory: " + file.getName());
@@ -57,12 +59,11 @@ public class JsonParse {
                 if (!this.isFileValid(file.getName())) {
                     continue;
                 }
-                
+
                 FileInputStream fis = null;
-                
                 try {
                     fis = new FileInputStream(file);
-                    
+
                     int content;
                     String text = "";
                     while ((content = fis.read()) != -1) {
@@ -71,7 +72,7 @@ public class JsonParse {
                         text = text + tmp;
                     }
                     this.parseJSON(text);
-                    
+
                 } catch (IOException e) {
                     e.printStackTrace();
                 } finally {
@@ -83,16 +84,38 @@ public class JsonParse {
                         ex.printStackTrace();
                     }
                 }
-                
+
             }
         }
+        db.setDataArray(tweets);
+        db.doFlush();
+        db.close();
+        tweets.clear();
     }
-    
+
     public void openFile(String path) {
         File[] files = new File(path).listFiles();
+        for (File file : files) {
+            if (file.isDirectory()) {
+                PrintWriter writer = null;
+                try {
+                    System.out.println("Directory: " + file.getName());
+                    boolean check = new File(path+file.getName(), "_DONE").exists();
+                    if (check)
+                        continue;
+                    this.openDir(file.listFiles());
+                    writer = new PrintWriter(path+file.getName()+"/_DONE", "UTF-8");
+                    writer.close();
+                } catch (FileNotFoundException ex) {
+                    Logger.getLogger(JsonParse.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (UnsupportedEncodingException ex) {
+                    Logger.getLogger(JsonParse.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        }
         this.openDir(files);
     }
-    
+
     public void parseJSON(String singleLine) {
         JSONObject json = new JSONObject(singleLine);
         JSONArray jry = json.getJSONArray("statuses");
@@ -100,7 +123,7 @@ public class JsonParse {
             JSONObject obj, pobj;
             obj = (JSONObject) jry.get(i);
             pobj = (JSONObject) obj.get("user");
-            
+
             JsonTweet jt = new JsonTweet(obj.get("id_str").toString(), pobj.get("id_str").toString());
             jt.setText(obj.get("text").toString());
             jt.setRetweetCount(obj.get("retweet_count").toString());
@@ -115,7 +138,7 @@ public class JsonParse {
             jt.setTruncated(obj.get("truncated").toString());
             jt.setFavorited(obj.get("favorited").toString());
             jt.setCoordinates(obj.get("coordinates").toString());
-            
+
             JsonTweetUser jtu = jt.getUser();
             jtu.setLocation(pobj.get("location").toString());
             jtu.setDefaultProfile(pobj.get("default_profile").toString());
@@ -145,9 +168,9 @@ public class JsonParse {
             jtu.setScreenName(pobj.get("screen_name").toString());
             jtu.setListedCount(pobj.get("listed_count").toString());
             jtu.setIsTranslator(pobj.get("is_translator").toString());
-            
+
             tweets.add(jt);
         }
     }
-    
+
 }
