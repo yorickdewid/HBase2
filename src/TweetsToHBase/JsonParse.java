@@ -63,9 +63,6 @@ public class JsonParse {
                 try {
                     fis = new FileInputStream(file);
                     
-                    System.out.println("Total file size to read (in bytes) : "
-                            + fis.available());
-                    
                     int content;
                     String text = "";
                     while ((content = fis.read()) != -1) {
@@ -103,8 +100,6 @@ public class JsonParse {
             JSONObject obj, pobj;
             obj = (JSONObject) jry.get(i);
             pobj = (JSONObject) obj.get("user");
-            
-            System.out.println("Username: " + pobj.get("name"));
             
             JsonTweet jt = new JsonTweet(obj.get("id_str").toString(), pobj.get("id_str").toString());
             jt.setText(obj.get("text").toString());

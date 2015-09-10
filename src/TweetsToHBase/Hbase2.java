@@ -90,7 +90,7 @@ public class Hbase2 {
             System.out.println("data inserted");
 
         }
-        //hTable.close();
+        hTable.close();
 
     }
 
