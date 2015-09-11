@@ -72,7 +72,6 @@ public class JsonParse {
                         text = text + tmp;
                     }
                     this.parseJSON(text);
-
                 } catch (IOException e) {
                     e.printStackTrace();
                 } finally {
@@ -118,6 +117,9 @@ public class JsonParse {
 
     public void parseJSON(String singleLine) {
         JSONObject json = new JSONObject(singleLine);
+        if (!json.has("statuses")) {
+            return;
+        }
         JSONArray jry = json.getJSONArray("statuses");
         for (int i = 0; i < jry.length(); i++) {
             JSONObject obj, pobj;
