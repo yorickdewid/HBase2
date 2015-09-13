@@ -41,7 +41,7 @@ public class JsonParse {
 
     private boolean isFileValid(String filename) {
         String[] ext = filename.split("\\.");
-        if (ext[1] == null) {
+        if (ext.length != 2) {
             return false;
         } else if ("json".equals(ext[1])) {
             return true;
