@@ -22,10 +22,10 @@ import org.json.*;
  */
 public class JsonParse {
 
-    private ArrayList<JsonTweet> tweets;
+    private final ArrayList<JsonTweet> tweets;
 
     public JsonParse() {
-        this.tweets = new ArrayList<JsonTweet>();
+        this.tweets = new ArrayList<>();
     }
 
     public String getTimestampFromPath(String path) {
@@ -40,10 +40,10 @@ public class JsonParse {
     }
 
     private boolean isFileValid(String filename) {
-        String ext = filename.split("\\.")[1];
-        if (ext == null) {
+        String[] ext = filename.split("\\.");
+        if (ext[1] == null) {
             return false;
-        } else if ("json".equals(ext)) {
+        } else if ("json".equals(ext[1])) {
             return true;
         }
         return false;
@@ -73,14 +73,12 @@ public class JsonParse {
                     }
                     this.parseJSON(text);
                 } catch (IOException e) {
-                    e.printStackTrace();
                 } finally {
                     try {
                         if (fis != null) {
                             fis.close();
                         }
                     } catch (IOException ex) {
-                        ex.printStackTrace();
                     }
                 }
 
@@ -96,7 +94,7 @@ public class JsonParse {
         File[] files = new File(path).listFiles();
         for (File file : files) {
             if (file.isDirectory()) {
-                PrintWriter writer = null;
+                PrintWriter writer;
                 try {
                     System.out.println("Directory: " + file.getName());
                     boolean check = new File(path+file.getName(), "_DONE").exists();
@@ -105,9 +103,7 @@ public class JsonParse {
                     this.openDir(file.listFiles());
                     writer = new PrintWriter(path+file.getName()+"/_DONE", "UTF-8");
                     writer.close();
-                } catch (FileNotFoundException ex) {
-                    Logger.getLogger(JsonParse.class.getName()).log(Level.SEVERE, null, ex);
-                } catch (UnsupportedEncodingException ex) {
+                } catch (FileNotFoundException | UnsupportedEncodingException ex) {
                     Logger.getLogger(JsonParse.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
@@ -158,7 +154,8 @@ public class JsonParse {
             jtu.setTranslationEnabled(pobj.get("is_translation_enabled").toString());
             jtu.setDefaultProfileImg(pobj.get("default_profile_image").toString());
             jtu.setFollowerCount(pobj.get("followers_count").toString());
-            jtu.setExtendedProfile(pobj.get("has_extended_profile").toString());
+            if (pobj.has("has_extended_profile"))
+                jtu.setExtendedProfile(pobj.get("has_extended_profile").toString());
             jtu.setProfileImg(pobj.get("profile_image_url_https").toString());
             jtu.setGeoEnabled(pobj.get("geo_enabled").toString());
             jtu.setProfileBackgroundImg(pobj.get("profile_background_image_url_https").toString());

@@ -71,7 +71,8 @@ public class DBInsert {
             p.add(Bytes.toBytes("profile"), Bytes.toBytes("is_translation_enabled"), Bytes.toBytes(tw.getUser().getIs_translation_enabled()));
             p.add(Bytes.toBytes("profile"), Bytes.toBytes("default_profile_image"), Bytes.toBytes(tw.getUser().getDefault_profile_image()));
             p.add(Bytes.toBytes("profile"), Bytes.toBytes("followers_count"), Bytes.toBytes(tw.getUser().getFollowers_count()));
-            p.add(Bytes.toBytes("profile"), Bytes.toBytes("has_extended_profile"), Bytes.toBytes(tw.getUser().getHas_extended_profile()));
+            if (tw.getUser().getHas_extended_profile() != null)
+                p.add(Bytes.toBytes("profile"), Bytes.toBytes("has_extended_profile"), Bytes.toBytes(tw.getUser().getHas_extended_profile()));
             p.add(Bytes.toBytes("profile"), Bytes.toBytes("profile_image_url_https"), Bytes.toBytes(tw.getUser().getProfile_image_url_https()));
             p.add(Bytes.toBytes("profile"), Bytes.toBytes("geo_enabled"), Bytes.toBytes(tw.getUser().getGeo_enabled()));
             p.add(Bytes.toBytes("profile"), Bytes.toBytes("profile_background_image_url_https"), Bytes.toBytes(tw.getUser().getProfile_background_image_url_https()));
